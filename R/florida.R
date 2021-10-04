@@ -1,3 +1,4 @@
+## random maps
 florida_prices <- 
   read_csv("~/Downloads/MedValuePerSqft_county.csv", col_types = cols("fips" = col_character())) %>% 
   filter(str_detect(monthlydate, "2018|2017")) %>% 
