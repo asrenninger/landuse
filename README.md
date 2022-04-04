@@ -1,7 +1,7 @@
 # landuse
 #### a national land use regulatory index
 
-This repository reproduces a workflow to predict land use with a combination of satellite imagery, administrative data, street topology. The imagery used in the model comes from Google Earth Engine, and [this](https://code.earthengine.google.com/?scriptPath=users%2Fasrenninger%2Fgeosoftware%3Aworkflow_nj) script produces the files.  
+This repository reproduces a workflow to predict land use with a combination of satellite imagery, administrative data, street topology. The imagery used in the model comes from Google Earth Engine, and [this](https://colab.research.google.com/drive/1-7TeNduO6VmV0bmN0bgeHnWZ_DEwMpqK?usp=sharing) script produces the files.  
 
 - `help.R` constains a function to create spatially lagged variables
 - `extract.R` allows us to convert raster imagery into tabular data
