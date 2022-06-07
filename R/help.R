@@ -5,6 +5,8 @@
 ## packages
 library(tidyverse)
 library(sf)
+library(tigris)
+library(crsuggest)
 
 ## smoothing
 nn_interpolate <- function(data, depth = 5) {
@@ -72,4 +74,30 @@ nn_interpolate <- function(data, depth = 5) {
   return(final)
   
 }
+
+## get CRS
+get_crs <-
+  function(state){
+    
+    # get name
+    geog_name <- 
+      tigris::fips_codes %>%
+      filter(state_code == geography) %>%
+      distinct(state) %>%
+      pull()
+    
+    # get local crs
+    geog_proj <-
+      crsuggest::crs_sf %>%
+      filter(str_detect(crs_name, "NAD83\\(HARN\\)"),
+             crs_units == "m") %>%
+      filter(str_detect(crs_name, geog_name)) %>%
+      slice(1) %>%
+      pull(crs_proj4)
+    
+    return(geog_proj)
+    
+  }
+
+
 
