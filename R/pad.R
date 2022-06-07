@@ -23,6 +23,7 @@ geog_proj <-
   filter(str_detect(crs_name, "NAD83\\(HARN\\)"),
          crs_units == "m") %>%
   filter(str_detect(crs_name, geog_name)) %>%
+  slice(1) %>%
   pull(crs_proj4)
 
 # another way...
@@ -33,9 +34,10 @@ blocks <-
   block_groups(state = geography, cb = TRUE, class = 'sf') %>% 
   st_transform(geog_proj) %>% 
   transmute(GEOID, 
-            area_total = units::set_units(st_area(geometry), m^2))
+            area_total = units::set_units(st_area(geometry), m^2),
+            difference = (units::drop_units(area_total) - ALAND - AWATER) / units::drop_units(area_total))
 
-plot(st_geometry(blocks))
+plot(select(blocks, difference))
 
 ## state boundary
 border <- 
@@ -70,7 +72,7 @@ protections <-
                 designation_area <- 
                   blocks %>%
                   st_difference(designation) %>%
-                  mutate(area_protected = area_total - units::set_units(st_area(geometry), acres),
+                  mutate(area_protected = area_total - units::set_units(st_area(geometry), m^2),
                          protection = layer_label) %>%
                   st_drop_geometry() %>%
                   select(-area_total)
@@ -93,3 +95,27 @@ protections %>%
   mutate_at(vars(starts_with("PAD")), funs(case_when(is.na(.) ~ area_total, TRUE ~ .))) %>%
   write_csv("protections_mt.csv")
 
+protections %>%
+  left_join(blocks) %>%
+  mutate(area_total = units::drop_units(area_total), 
+         area_protected = units::drop_units(area_protected),
+         area_protected = round(area_protected, 4)) %>%
+  pivot_wider(id_cols = GEOID:area_total,
+              names_from = protection,
+              values_from = area_protected) %>%
+  mutate_at(vars(starts_with("PAD")), funs(case_when(is.na(.) ~ area_total, TRUE ~ .))) %>%
+  select(-area_total) %>%
+  select(GEOID, starts_with("PAD")) %>%
+  pivot_longer(!GEOID) %>%
+  mutate(name = str_remove_all(name, "PADUS2_1")) %>%
+  left_join(blocks) %>%
+  st_as_sf() %>%
+  ggplot(aes(fill = value / (1000 * 1000))) +
+  geom_sf(colour = '#ffffff', size = 0) +
+  scale_fill_gradientn(colours = RColorBrewer::brewer.pal(n = 9, name = 'Greens'),
+                       name = expression(bold(area~(km^2)))) +
+  facet_wrap(~name) + 
+  theme_void() +
+  theme(strip.text = element_text(face = 'bold', size = 15))
+
+ggsave(plot = last_plot(), filename = "montana_protected_areas.png", height = 10, width = 12, dpi = 300)
