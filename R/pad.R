@@ -34,14 +34,14 @@ blocks <-
   block_groups(state = geography, cb = TRUE, class = 'sf') %>% 
   st_transform(geog_proj) %>% 
   transmute(GEOID, 
-            area_total = units::set_units(st_area(geometry), m^2),
-            difference = (units::drop_units(area_total) - ALAND - AWATER) / units::drop_units(area_total))
+            area_total = units::set_units(st_area(geometry), m^2))
 
-plot(select(blocks, difference))
+plot(st_geometry(blocks))
 
 ## state boundary
 border <- 
   blocks %>%
+  st_transform(2163) %>%
   st_union() %>%
   st_combine()
 
@@ -54,34 +54,49 @@ pad <-
   map(layers,
       ~st_read("data/pad/PADUS2_1_Geopackage/PADUS2_1_Geopackage.gpkg",
                layer = .x) %>%
-        st_transform(st_crs(border)) %>%
-        st_intersection(border))
+        st_transform(2163) %>%
+        st_intersection(border) %>%
+        st_transform(geog_proj) %>%
+        transmute(geometry = SHAPE))
 
 ## difference out the protected areas 
-protections <- 
-  reduce(imap(pad, 
-              function(x, y){
-                designation <- 
-                  x %>%
-                  st_union() %>% 
-                  st_combine()
-                
-                layer_label <- layers[y]
-                
-                tictoc::tic()
-                designation_area <- 
-                  blocks %>%
-                  st_difference(designation) %>%
-                  mutate(area_protected = area_total - units::set_units(st_area(geometry), m^2),
-                         protection = layer_label) %>%
-                  st_drop_geometry() %>%
-                  select(-area_total)
-                tictoc::toc()
-                
-                return(designation_area)
-                
-              }),
-         rbind)
+# protections <- 
+#   reduce(imap(pad, 
+#               function(x, y){
+#                 designation <- 
+#                   x %>%
+#                   st_union() %>% 
+#                   st_combine()
+#                 
+#                 layer_label <- layers[y]
+#                 
+#                 tictoc::tic()
+#                 designation_area <- 
+#                   blocks %>%
+#                   st_difference(designation) %>%
+#                   mutate(area_protected = area_total - units::set_units(st_area(geometry), m^2),
+#                          protection = layer_label) %>%
+#                   st_drop_geometry() %>%
+#                   select(-area_total)
+#                 tictoc::toc()
+#                 
+#                 return(designation_area)
+#                 
+#               }),
+#          rbind)
+
+## ...for total protected areas
+pad <- 
+  pad %>% 
+  reduce(rbind) %>%
+  st_union() %>% 
+  st_combine()
+
+designation_area <- 
+  blocks %>%
+  st_difference(designation) %>%
+  mutate(area_protected = area_total - units::set_units(st_area(geometry), m^2)) %>%
+  st_drop_geometry()
 
 ## aggregate all protections
 protections %>%
