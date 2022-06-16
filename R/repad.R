@@ -10,17 +10,16 @@ library(tigris)
 states <- c("04", "12", "15", "16", "24", "30", "34", "44")
 map(states, get_pad)
 
-states <- unique(tigris::fips_codes$state)[1:51][-states]
-map(states, get_pad)
-
-tigris::fips_codes %>% distinct(state, .keep_all = TRUE)
+states <- unique(tigris::fips_codes$state_code)[1:51]
+states <- states[!states %in% c("02", "04", "12", "15", "16", "24", "30", "34", "44")]
+map(states[5:length(states)], get_pad)
 
 ## set the state
 get_pad <-
   function(geography) {
     
     print(geography)
-    start <- Sys.time()
+    start <- Sys.time() 
     
     # get name
     geog_name <- 
@@ -97,3 +96,4 @@ get_pad <-
     write_csv(protected_area, glue::glue("~/Desktop/R/git/landuse/data/pad/processed/protections_{geography}.csv"))
     
   }
+  
