@@ -12,7 +12,7 @@ map(states, get_pad)
 
 states <- unique(tigris::fips_codes$state_code)[1:51]
 states <- states[!states %in% c("02", "04", "12", "15", "16", "24", "30", "34", "44")]
-map(states[5:length(states)], get_pad)
+map(states, get_pad)
 
 ## set the state
 get_pad <-
