@@ -7,16 +7,18 @@ library(tidyverse)
 library(sf)
 library(tigris)
 
-states <- c("04", "12", "15", "16", "24", "30", "34", "44")
+states <- c("04", "12", "15", "16", "24", "30", "34", "35", "44")
 map(states, get_pad)
 
 states <- unique(tigris::fips_codes$state_code)[1:51]
-states <- states[!states %in% c("02", "04", "12", "15", "16", "24", "30", "34", "44")]
+states <- states[!states %in% c("02", "04", "12", "15", "16", "24", "30", "34", "35", "44")]
 map(states, get_pad)
 
 ## set the state
 get_pad <-
   function(geography) {
+    
+    geography <- "35"
     
     print(geography)
     start <- Sys.time() 
