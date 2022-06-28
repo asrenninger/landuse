@@ -18,8 +18,6 @@ map(states, get_pad)
 get_pad <-
   function(geography) {
     
-    geography <- "35"
-    
     print(geography)
     start <- Sys.time() 
     
@@ -71,6 +69,7 @@ get_pad <-
           ~st_read("data/pad/PADUS2_1_Geopackage/PADUS2_1_Geopackage.gpkg",
                    layer = .x) %>%
             st_transform(2163) %>%
+            filter(st_is_valid(SHAPE) == TRUE) %>%
             st_intersection(border) %>% 
             st_transform(geog_proj) %>%
             transmute(geometry = SHAPE))
@@ -91,6 +90,14 @@ get_pad <-
              area_protected = units::drop_units(area_protected)) %>%
       mutate(area_protected = if_else(area_protected < 0, 0, area_protected))
     
+    protected_area <- 
+      blocks %>%
+      st_drop_geometry() %>%
+      filter(!GEOID %in% protected_area) %>%
+      mutate(area_total = units::drop_units(area_total),
+             area_protected = area_total) %>%
+      bind_rows(protected_area)
+    
     end <- Sys.time()
     print(end - start)
     
@@ -98,4 +105,6 @@ get_pad <-
     write_csv(protected_area, glue::glue("~/Desktop/R/git/landuse/data/pad/processed/protections_{geography}.csv"))
     
   }
+  
+
   
