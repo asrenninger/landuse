@@ -55,6 +55,8 @@ plot(st_geometry(blocks))
 counties <- group_split(blocks, COUNTYFP)
 zonal_stats <- map_dfr(counties, process_county)
 
+write_csv(st_drop_geometry(zonal_stats), glue::glue("zonal_stats_{geography}.csv"))
+
 ## SAVE THESE FUNCTIONS SO THE SCRIPT WILL RUN
 get_crs <-
   function(state){
@@ -197,4 +199,4 @@ process_county <-
   
   return(county_complete)
   
-}
+  }
