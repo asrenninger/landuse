@@ -1,4 +1,4 @@
-these files are census tract population from 1990, 2000, 2010, and 2019. the tracts were joined to the 2010 tract geoid ('trtid10' in csv) that is a 11-character field
+The tracts_pop_change.csv contains census tract population counts and differenecs from 1990, 2000, 2010, and 2019. the tracts were joined to the 2010 tract geoid ('trtid10' in csv) that is a 11-character field
 
 the linked census tracts and estimated population were from the Longitudinal Tract Data Base (links below)
 # https://s4.ad.brown.edu/projects/diversity/Researcher/Bridging.htm
