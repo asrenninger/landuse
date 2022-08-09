@@ -10,10 +10,14 @@ library(glue)
 
 # LTDB directory
 GITHUB_DIR = "C:/Users/nelms/OneDrive - PennO365/Penn/Wharton/NLURI/landuse_PROD"
-POP_DIR = paste0(GITHUB_DIR, '/', 'data/pop_change')
+setwd(GITHUB_DIR)
+
+POP_DIR = 'data/pop_change'
 LTDB_DIR = paste0(POP_DIR, '/', 'raw_LTDB')
 
-setwd(POP_DIR)
+# get clean geoid functions
+clean_geoid_path = "R/prepare_data/clean_geoid.R"
+source(clean_geoid_path)
 
 census_key_path = "C:/Users/nelms/Documents/Code/keys/census_api_key.txt"
 
@@ -53,17 +57,10 @@ for (year in years) {
     cols = replace(cols, cols %in% id_cols, id_col)
     colnames(year_df) = cols
 
-    year_df[[id_col]] = year_df[[id_col]] %>% as.character()
-
-    character_correct = function(c) {
-        chr = as.character(c)
-        if (nchar(chr)==10) {
-            chr = paste0('0', c)
-        }
-        return(chr)
-    }
-    year_df[[id_col]] = sapply(
-        year_df[[id_col]], function(c) character_correct(c))
+    year_df[[id_col]] =
+        year_df[[id_col]] %>%
+            format_geoid_col(., ideal_length = 11) %>%
+            fix_geoid(.)
 
     df_l[[year]] = year_df
 }
@@ -95,11 +92,14 @@ for (state in states) {
                 variables = "B01001A_001",
                 state = state,
                 geometry = FALSE,
-                year = 2019
+                year = 2019,
+                cb = FALSE,
+                quiet = TRUE
             ) %>%
             transmute(
                 trtid10 = GEOID %>%
-                    as.character(),
+                    format_geoid_col(., ideal_length = 11) %>%
+                    fix_geoid(.),
                 pop19 = estimate
             )) %>%
         mutate(state_fips =
@@ -108,6 +108,12 @@ for (state in states) {
         filter(state_fips < 60) %>%
         select(-state_fips)
 }
+
+acs_df =
+   acs_df %>%
+       mutate(
+        trtid10 = fix_geoid_col(trtid10, ideal_length=11)
+        )
 
 df_l[['2019']] = acs_df
 years = c(years, '2019')
@@ -169,9 +175,10 @@ remove_years = c('2010', '2020', '1970', '1980')
 for (year in years[!(years%in%remove_years)]) {
 
     year_df = df_l[[year]] %>%
-        mutate(state_fips =
-            substr(trtid10, 1, 2) %>%
-            as.numeric()) %>%
+        mutate(
+            state_fips =
+                substr(trtid10, 1, 2) %>%
+                as.numeric()) %>%
         filter(state_fips < 60) %>%
         select(-state_fips)
     yr = substr(year,3,4)
