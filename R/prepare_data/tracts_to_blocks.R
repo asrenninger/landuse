@@ -13,9 +13,9 @@ final_path = "data/pop_change/bg_pop_change.csv"
 clean_geoid_path = "R/prepare_data/clean_geoid.R"
 source(clean_geoid_path)
 
-################# GET BLOCK GROUP GEOIDS
-
 census_key_path = "C:/Users/nelms/Documents/Code/keys/census_api_key.txt"
+
+################# GET BLOCK GROUP GEOIDS
 
 key = readChar(census_key_path, file.info(census_key_path)$size)
 census_api_key(
@@ -107,7 +107,7 @@ bmin = min(tstat$min)*100
 bmax = max(tstat$max)*100
 
 
-bin1 = 5
+bin1 = 10
 bin2 = 20
 bins_s = c(-bin2, -bin1, bin1, bin2)
 bins_l = c(bmin, bins_s, bmax)
