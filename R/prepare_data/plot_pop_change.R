@@ -33,7 +33,7 @@ chi_l = list()
 fi_l = list()
 
 
-bin1 = 5
+bin1 = 10
 bin2 = 20
 bins_s = c(-bin2, -bin1, bin1, bin2)
 bins_l = c(bmin, bins_s, bmax)
