@@ -140,8 +140,8 @@ format_geoid_col = function(col, ideal_length=12) sapply(col, function(item) for
 changed_ids =
     read_csv(changed_path) %>%
     transmute(
-        old_geoid = format_geoid_col(`2010 GEOID`, ideal_length=12),
-        new_geoid = format_geoid_col(`New GEOID`, ideal_length=12)
+        old_geoid = format_geoid_col(`2010 GEOID`, ideal_length=11),
+        new_geoid = format_geoid_col(`New GEOID`, ideal_length=11)
     )
 
 # function to replace vector items with a old and new col
