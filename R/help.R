@@ -123,7 +123,7 @@ changed_path = paste0(
 ############# FORMAT GEOID COL
 
 # add 0 if below 11 (or 12)
-format_geoid = function(item, ideal_length=11) {
+format_geoid = function(item, ideal_length=12) {
     item = item %>% as.numeric() %>% as.character()
     item = ifelse(
         nchar(item) < ideal_length,
@@ -132,7 +132,7 @@ format_geoid = function(item, ideal_length=11) {
         )
     return(item)
 }
-format_geoid_col = function(col, ideal_length=11) sapply(col, function(item) format_geoid(item, ideal_length)) %>% unname()
+format_geoid_col = function(col, ideal_length=12) sapply(col, function(item) format_geoid(item, ideal_length)) %>% unname()
 
 ############# FIXING GEOID CHANGES
 
@@ -140,8 +140,8 @@ format_geoid_col = function(col, ideal_length=11) sapply(col, function(item) for
 changed_ids =
     read_csv(changed_path) %>%
     transmute(
-        old_geoid = format_geoid_col(`2010 GEOID`),
-        new_geoid = format_geoid_col(`New GEOID`)
+        old_geoid = format_geoid_col(`2010 GEOID`, ideal_length=12),
+        new_geoid = format_geoid_col(`New GEOID`, ideal_length=12)
     )
 
 # function to replace vector items with a old and new col
