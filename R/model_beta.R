@@ -352,3 +352,24 @@ bt_fit <-
 
 plot_comparison(bt_fit, rf_in, rf_out, state, name, 10)
 plot_comparison(rf_fit, rf_in, rf_out, state, name, 10)
+
+## diagnostics
+dag <- 
+  lasso_proc |> 
+  dplyr::select(c("maxhd_macro", all_of(relevant_features))) |>
+  tidyr::drop_na() |>
+  data.table::as.data.table() |> 
+  sparsebnUtils::sparsebnData(type = 'continuous') |> 
+  sparsebn::estimate.dag() 
+
+solution <- sparsebnUtils::select(dag, edges = 100)
+
+plot(solution,
+     layout = igraph::layout.circle, 
+     # layout = igraph::layout_(sparsebnUtils::to_igraph(solution$edges), igraph::in_circle()),
+     vertex.size = 5,
+     vertex.label.color = c('#000000', rep('#7c7c7c', length(igraph::V(sparsebnUtils::to_igraph(solution$edges))) - 1)),
+     vertex.color = gray(0.9),
+     edge.color = gray(0),
+     edge.arrow.size = 0.45
+)
